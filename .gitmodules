@@ -1,0 +1,6 @@
+[submodule "V-Django-Backend"]
+	path = V-Django-Backend
+	url = https://github.com/zebra-f/V-Django-Backend
+[submodule "V-React-Frontend"]
+	path = V-React-Frontend
+	url = https://github.com/zebra-f/V-React-Frontend
