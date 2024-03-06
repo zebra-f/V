@@ -1,6 +1,15 @@
 FROM node:hydrogen-alpine as build
 
 WORKDIR /app
+
+ARG REACT_API_URL
+ARG REACT_ClOUDFLARE_TURNSTILE_SITE_KEY
+ARG REACT_URL
+
+ENV REACT_API_URL=$REACT_API_URL
+ENV REACT_ClOUDFLARE_TURNSTILE_SITE_KEY=$REACT_ClOUDFLARE_TURNSTILE_SITE_KEY
+ENV REACT_URL=$REACT_URL
+
 COPY ../V-React-Frontend/package.json ./
 COPY ../V-React-Frontend/package-lock.json ./
 RUN npm ci --silent

@@ -82,6 +82,12 @@ services:
     build:
       context: .
       dockerfile: ./nginx/Dockerfile
+      args:
+        REACT_API_URL: ${REACT_API_URL}
+        REACT_ClOUDFLARE_TURNSTILE_SITE_KEY: ${REACT_ClOUDFLARE_TURNSTILE_SITE_KEY}
+        REACT_URL: ${REACT_URL}
+        NODE_ENV: 'production'
+    container_name: nginx_v_1_dev2
     ports:
       - 80:80
     volumes:
@@ -91,6 +97,7 @@ services:
       REACT_API_URL: ${REACT_API_URL}
       REACT_ClOUDFLARE_TURNSTILE_SITE_KEY: ${REACT_ClOUDFLARE_TURNSTILE_SITE_KEY}
       REACT_URL: ${REACT_URL}
+      NODE_ENV: 'production'
     depends_on: 
       - django
 
