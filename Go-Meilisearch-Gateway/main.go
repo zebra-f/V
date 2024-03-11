@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -31,14 +32,23 @@ func main() {
 	criticalLogger := log.New(multiWriter, "[CRITICAL] ", log.Ldate|log.Ltime)
 	errorLogger := log.New(multiWriter, "[ERROR] ", log.Ldate|log.Ltime)
 
-	address := "127.0.0.1:8080"
-
 	_, err = index.UpdateFilterableAttributes(&[]string{"is_public"})
 	if err != nil {
 		fmt.Printf("Can't update filterable attributes in Meilisearch, %s\n", err)
 		criticalLogger.Printf("Can't update filterable attributes in Meilisearch, %s\n", err)
 		panic(err)
 	}
+
+	if len(os.Args) < 2 {
+		panic("Port number was not provided.")
+	}
+	port := os.Args[1]
+	_, err = strconv.Atoi(port)
+	if err != nil {
+		panic("Incorrect port number.")
+	}
+
+	address := "127.0.0.1:" + port
 
 	http.HandleFunc("/meilisearch/", meilisearchHandler(errorLogger))
 	server := &http.Server{
