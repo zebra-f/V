@@ -3,3 +3,5 @@
 postgres_data/
 meilisearch-data/
 meili_data/
+
+log*
