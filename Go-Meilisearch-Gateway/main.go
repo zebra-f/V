@@ -19,6 +19,12 @@ var index = client.Index("speeds")
 func main() {
 	address := "127.0.0.1:8080"
 
+	_, err := index.UpdateFilterableAttributes(&[]string{"is_public"})
+	if err != nil {
+		fmt.Printf("Can't update filterable attributes in Meilisearch, %s\n", err)
+		panic(err)
+	}
+
 	http.HandleFunc("/meilisearch/", meilisearchHandler)
 	server := &http.Server{
 		Addr:    address,
@@ -26,30 +32,31 @@ func main() {
 	}
 
 	fmt.Printf("HTTP Server listening on %s...\n", address)
-
 	if err := server.ListenAndServe(); err != nil {
 		fmt.Printf("Error starting server: %s\n", err)
+		panic(err)
 	}
 }
 
 func meilisearchHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("\n\n------")
 	queryParams := r.URL.Query()
 	q := queryParams.Get("q")
-	if q == "" {
-		err := fmt.Errorf("Missing 'q' parameter")
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	} else {
-		fmt.Println("q: ", q)
-	}
-	fmt.Println("query params:", queryParams)
-	fmt.Printf("request type: %T,\nrequest value: %v\n", r, r)
-	fmt.Fprintf(w, "Hello, you've requested: %s\n", r.URL.Path)
-	searchRes, err := index.Search("test",
+
+	searchRes, err := index.Search(q,
 		&meilisearch.SearchRequest{
-			Limit: 10,
+			Limit:  10,
+			Filter: "is_public = true",
 		})
-	fmt.Println("\n---------\nmeiliserach results:", searchRes)
-	fmt.Println("meiliearch err:", err)
+	if err != nil {
+		http.Error(w, "Internal Server Search Error", http.StatusInternalServerError)
+		return
+	}
+	jsonSearchRes, err := searchRes.MarshalJSON()
+	if err != nil {
+		http.Error(w, "Internal Server JSON Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(jsonSearchRes)
 }
