@@ -15,7 +15,7 @@ var meilisearchMasterKey = os.Getenv("MEILISEARCH_V_1_MASTER_KEY")
 var meilisearchUrl = os.Getenv("MEILISEARCH_URL")
 
 var client = meilisearch.NewClient(meilisearch.ClientConfig{
-	Host:   "http://127.0.0.1:7700",
+	Host:   meilisearchUrl,
 	APIKey: meilisearchMasterKey,
 })
 var index = client.Index("speeds")
@@ -39,16 +39,26 @@ func main() {
 		panic(err)
 	}
 
-	if len(os.Args) < 2 {
-		panic("Port number was not provided.")
-	}
-	port := os.Args[1]
-	_, err = strconv.Atoi(port)
-	if err != nil {
-		panic("Incorrect port number.")
+	if len(os.Args) < 3 {
+		panic("Specify mode [local/container] and port in runtime arguments.")
 	}
 
-	address := "127.0.0.1:" + port
+	port := os.Args[2]
+	_, err = strconv.Atoi(port)
+	if err != nil {
+		panic("Incorrect port argument.")
+	}
+
+	mode := os.Args[1]
+
+	var address string
+	if mode == "local" {
+		address = "127.0.0.1:" + port
+	} else if mode == "container" {
+		address = "0.0.0.0:" + port
+	} else {
+		panic("Incorrect mode argument.")
+	}
 
 	http.HandleFunc("/meilisearch/", meilisearchHandler(errorLogger))
 	server := &http.Server{

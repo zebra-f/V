@@ -77,6 +77,19 @@ services:
       - postgres
       - redis
       - django
+  go-meilisearch-gateway:
+    restart: unless-stopped
+    build:
+      context: ./Go-Meilisearch-Gateway/
+      dockerfile: Dockerfile
+    ports:
+      - 8080:8080
+    environment:
+      MEILISEARCH_V_1_MASTER_KEY: ${MEILISEARCH_V_1_MASTER_KEY}
+      # also set in the .env file used by django/celery, make sure it's correct
+      MEILISEARCH_URL: "http://meilisearch:7700"
+    depends_on:
+      - meilisearch
   nginx: 
     restart: unless-stopped
     build:
