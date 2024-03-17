@@ -94,8 +94,9 @@ services:
     restart: unless-stopped
     build:
       context: .
-      dockerfile: ./nginx/Dockerfile
+      dockerfile: ./Nginx/Dockerfile
       args:
+        # for Vite
         REACT_API_URL: ${REACT_API_URL}
         REACT_ClOUDFLARE_TURNSTILE_SITE_KEY: ${REACT_ClOUDFLARE_TURNSTILE_SITE_KEY}
         REACT_URL: ${REACT_URL}
@@ -105,14 +106,20 @@ services:
       - 80:80
     volumes:
       - django_static:/django_app/django_static
-      - ./nginx/dev:/etc/nginx/conf.d
+      - ./Nginx/dev:/etc/nginx/conf.d
     environment:
+      # for Vite
       REACT_API_URL: ${REACT_API_URL}
       REACT_ClOUDFLARE_TURNSTILE_SITE_KEY: ${REACT_ClOUDFLARE_TURNSTILE_SITE_KEY}
       REACT_URL: ${REACT_URL}
       NODE_ENV: 'production'
     depends_on: 
       - django
+  # certbot:
+  #   image: certbot/certbot:latest
+  #   volumes:
+  #     - ./certbot/www/:/var/www/certbot/:rw
+  #     - ./certbot/conf/:/etc/letsencrypt/:rw
 
 volumes:
   django_static:
