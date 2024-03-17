@@ -2,8 +2,9 @@ version: '3.8'
 
 services:
   postgres:
+    restart: unless-stopped
     image: postgres:15-alpine
-    container_name: postgres_v_1
+    container_name: postgres-v-1
     environment:
       POSTGRES_DB: ${POSTGRES_DB_NAME}
       POSTGRES_PASSWORD: ${POSTGRES_V_1_PASSWORD}
@@ -18,21 +19,23 @@ services:
     ports:
       - "6379:6379"
   meilisearch:
+    restart: unless-stopped
     image: getmeili/meilisearch:v1.5
-    container_name: meilisearch_v_1_dev
+    container_name: meilisearch-v-1
     ports:
       - "7700:7700"
     environment:
-      MEILI_ENV: development
+      MEILI_ENV: production
       MEILI_MASTER_KEY: ${MEILISEARCH_V_1_MASTER_KEY}
     volumes:
       - ${BIND_MOUNT_DATA_PATH}/meili_data:/meili_data
   django:
+    restart: unless-stopped
     build:
       context: ./V-Django-Backend/
       dockerfile: ./compose/prod/django/Dockerfile
-    image: django_v_1_dev2:latest
-    container_name: django_v_1_dev2
+    image: django-v-1:latest
+    container_name: django-v-1
     command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - .:/app
@@ -53,17 +56,17 @@ services:
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
       ADMIN_URL_SEGMENT: ${ADMIN_URL_SEGMENT}
     env_file:
-      - ./django_env/.env.dev
+      - ./django_env/.env.prod
     depends_on:
       - postgres
       - redis
       - meilisearch
-  celery:
-    image: django_v_1_dev2:latest
-    container_name: celery_v_1_dev2
-    entrypoint: ./compose/dev/django/celery/entrypoint.sh
-    # starts a single process for Celery Workers and Celery Beat for the development of this app
-    command: celery -A core worker -B --loglevel=INFO 
+  celery-worker:
+    restart: unless-stopped
+    image: django-v-1:latest
+    container_name: celery-worker-v-1
+    entrypoint: ./compose/prod/django/celery/entrypoint.sh
+    command: celery -A core worker --loglevel=info
     volumes:
       - .:/app
     environment:
@@ -80,13 +83,42 @@ services:
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
       ADMIN_URL_SEGMENT: ${ADMIN_URL_SEGMENT}
     env_file:
-      - ./django_env/.env.dev
+      - ./django_env/.env.prod
+    depends_on:
+      - postgres
+      - redis
+      - django
+  celery-beat:
+    restart: unless-stopped
+    image: django-v-1:latest
+    container_name: celery-beat-v-1
+    entrypoint: ./compose/prod/django/celery/entrypoint.sh
+    # starts a single process for Celery Workers and Celery Beat for the development of this app
+    command: celery -A core beat --loglevel=INFO 
+    volumes:
+      - .:/app
+    environment:
+      MEILISEARCH_V_1_MASTER_KEY: ${MEILISEARCH_V_1_MASTER_KEY}
+      POSTGRES_V_1_PASSWORD: ${POSTGRES_V_1_PASSWORD}
+      DJANGO_V_1_SECRET_KEY: ${DJANGO_V_1_SECRET_KEY}
+      POSTGRES_DB_NAME: ${POSTGRES_DB_NAME}
+      POSTGRES_USER: ${POSTGRES_USER}
+      GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID}
+      GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
+      CLOUDFLARE_TURNSTILE_SECRET_KEY: ${CLOUDFLARE_TURNSTILE_SECRET_KEY}
+      EMAIL_HOST: ${EMAIL_HOST}
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      ADMIN_URL_SEGMENT: ${ADMIN_URL_SEGMENT}
+    env_file:
+      - ./django_env/.env.prod
     depends_on:
       - postgres
       - redis
       - django
   go-meilisearch-gateway:
     restart: unless-stopped
+    container_name: go-meilisearch-gateway-v-1
     build:
       context: ./Go-Meilisearch-Gateway/
       dockerfile: Dockerfile
@@ -109,12 +141,14 @@ services:
         REACT_ClOUDFLARE_TURNSTILE_SITE_KEY: ${REACT_ClOUDFLARE_TURNSTILE_SITE_KEY}
         REACT_URL: ${REACT_URL}
         NODE_ENV: 'production'
-    container_name: nginx_v_1_dev2
+    container_name: nginx-v-1
     ports:
       - 80:80
     volumes:
       - django_static:/django_app/django_static
       - ./Nginx/dev:/etc/nginx/conf.d
+      - ./certbot/www/:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw
     environment:
       # for Vite
       REACT_API_URL: ${REACT_API_URL}
@@ -123,11 +157,13 @@ services:
       NODE_ENV: 'production'
     depends_on: 
       - django
-  # certbot:
-  #   image: certbot/certbot:latest
-  #   volumes:
-  #     - ./certbot/www/:/var/www/certbot/:rw
-  #     - ./certbot/conf/:/etc/letsencrypt/:rw
+  certbot:
+    image: certbot/certbot:latest
+    container_name: certbot-v-1
+    volumes:
+      - ./certbot/www/:/var/www/certbot/:rw
+      - ./certbot/conf/:/etc/letsencrypt/:rw
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 volumes:
   django_static:
