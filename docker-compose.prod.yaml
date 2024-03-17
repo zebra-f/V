@@ -65,7 +65,7 @@ services:
     restart: unless-stopped
     image: django-v-1:latest
     container_name: celery-worker-v-1
-    entrypoint: ./compose/prod/django/celery/entrypoint.sh
+    entrypoint: ./compose/prod/django/celery/workers/entrypoint.sh
     command: celery -A core worker --loglevel=info
     volumes:
       - .:/app
@@ -92,7 +92,7 @@ services:
     restart: unless-stopped
     image: django-v-1:latest
     container_name: celery-beat-v-1
-    entrypoint: ./compose/prod/django/celery/entrypoint.sh
+    entrypoint: ./compose/prod/django/celery/beat/entrypoint.sh
     # starts a single process for Celery Workers and Celery Beat for the development of this app
     command: celery -A core beat --loglevel=INFO 
     volumes:
