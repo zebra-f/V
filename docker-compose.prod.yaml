@@ -15,7 +15,7 @@ services:
       - ${BIND_MOUNT_DATA_PATH}/postgres_data/data:/var/lib/postgresql/data
   redis:
     image: redis:7.2.1-alpine
-    container_name: redis_v_1_dev
+    container_name: redis-v-1
     ports:
       - "6379:6379"
   meilisearch:
@@ -36,7 +36,7 @@ services:
       dockerfile: ./compose/prod/django/Dockerfile
     image: django-v-1:latest
     container_name: django-v-1
-    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
+    command: gunicorn --workers 4 core.wsgi:application --bind 0.0.0.0:8000
     volumes:
       - .:/app
       - django_static:/django_app/django_static/
@@ -146,7 +146,7 @@ services:
       - 80:80
     volumes:
       - django_static:/django_app/django_static
-      - ./Nginx/dev:/etc/nginx/conf.d
+      - ./Nginx/prod:/etc/nginx/conf.d
       - ./certbot/www/:/var/www/certbot/:rw
       - ./certbot/conf/:/etc/letsencrypt/:rw
     environment:
