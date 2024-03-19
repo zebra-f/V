@@ -12,6 +12,7 @@ services:
     volumes:
       - ${BIND_MOUNT_DATA_PATH}/postgres_data/data:/var/lib/postgresql/data
   redis:
+    restart: unless-stopped
     image: redis:7.2.1-alpine
     container_name: redis-v-1
   meilisearch:
@@ -85,8 +86,7 @@ services:
     image: django-v-1:latest
     container_name: celery-beat-v-1
     entrypoint: ./compose/prod/django/celery/beat/entrypoint.sh
-    # starts a single process for Celery Workers and Celery Beat for the development of this app
-    command: celery -A core beat --loglevel=INFO 
+    command: celery -A core beat --loglevel=info
     volumes:
       - .:/app
     environment:
@@ -139,16 +139,18 @@ services:
     volumes:
       - django_static:/django_app/django_static
       - ./Nginx/prod:/etc/nginx/conf.d
-      - ./certbot/www/:/var/www/certbot/:rw
-      - ./certbot/conf/:/etc/letsencrypt/:rw
+      - ../certbot/www/:/var/www/certbot/:rw
+      - ../certbot/conf/:/etc/letsencrypt/:rw
     depends_on: 
       - django
+      - go-meilisearch-gateway
   certbot:
+    restart: unless-stopped
     image: certbot/certbot:latest
     container_name: certbot-v-1
     volumes:
-      - ./certbot/www/:/var/www/certbot/:rw
-      - ./certbot/conf/:/etc/letsencrypt/:rw
+      - ../certbot/www/:/var/www/certbot/:rw
+      - ../certbot/conf/:/etc/letsencrypt/:rw
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 volumes:
