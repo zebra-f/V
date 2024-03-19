@@ -140,6 +140,7 @@ services:
         REACT_API_URL: ${REACT_API_URL}
         REACT_ClOUDFLARE_TURNSTILE_SITE_KEY: ${REACT_ClOUDFLARE_TURNSTILE_SITE_KEY}
         REACT_URL: ${REACT_URL}
+        REACT_GO_MEILISEARCH_GATEWAY_URL: ${REACT_GO_MEILISEARCH_GATEWAY_URL}
         NODE_ENV: 'production'
     container_name: nginx-v-1
     ports:
@@ -149,12 +150,6 @@ services:
       - ./Nginx/prod:/etc/nginx/conf.d
       - ./certbot/www/:/var/www/certbot/:rw
       - ./certbot/conf/:/etc/letsencrypt/:rw
-    environment:
-      # for Vite
-      REACT_API_URL: ${REACT_API_URL}
-      REACT_ClOUDFLARE_TURNSTILE_SITE_KEY: ${REACT_ClOUDFLARE_TURNSTILE_SITE_KEY}
-      REACT_URL: ${REACT_URL}
-      NODE_ENV: 'production'
     depends_on: 
       - django
   certbot:

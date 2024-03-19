@@ -108,19 +108,14 @@ services:
         REACT_API_URL: ${REACT_API_URL}
         REACT_ClOUDFLARE_TURNSTILE_SITE_KEY: ${REACT_ClOUDFLARE_TURNSTILE_SITE_KEY}
         REACT_URL: ${REACT_URL}
-        NODE_ENV: 'production'
+        REACT_GO_MEILISEARCH_GATEWAY_URL: ${REACT_GO_MEILISEARCH_GATEWAY_URL}
+        NODE_ENV: 'development'
     container_name: nginx_v_1_dev2
     ports:
       - 80:80
     volumes:
       - django_static:/django_app/django_static
       - ./Nginx/dev:/etc/nginx/conf.d
-    environment:
-      # for Vite
-      REACT_API_URL: ${REACT_API_URL}
-      REACT_ClOUDFLARE_TURNSTILE_SITE_KEY: ${REACT_ClOUDFLARE_TURNSTILE_SITE_KEY}
-      REACT_URL: ${REACT_URL}
-      NODE_ENV: 'production'
     depends_on: 
       - django
   # certbot:
