@@ -33,7 +33,7 @@ services:
     volumes:
       - .:/app
       - django_static:/django_app/django_static/
-    environment:
+    environment: &env-vars
       MEILISEARCH_V_1_MASTER_KEY: ${MEILISEARCH_V_1_MASTER_KEY}
       POSTGRES_V_1_PASSWORD: ${POSTGRES_V_1_PASSWORD}
       DJANGO_V_1_SECRET_KEY: ${DJANGO_V_1_SECRET_KEY}
@@ -47,7 +47,7 @@ services:
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
       ADMIN_URL_SEGMENT: ${ADMIN_URL_SEGMENT}
     env_file:
-      - ./django_env/.env.prod
+      - ./V-Django-Backend/compose/prod/django/.env.prod
     depends_on:
       - postgres
       - redis
@@ -60,21 +60,9 @@ services:
     command: celery -A core worker --loglevel=info
     volumes:
       - .:/app
-    environment:
-      MEILISEARCH_V_1_MASTER_KEY: ${MEILISEARCH_V_1_MASTER_KEY}
-      POSTGRES_V_1_PASSWORD: ${POSTGRES_V_1_PASSWORD}
-      DJANGO_V_1_SECRET_KEY: ${DJANGO_V_1_SECRET_KEY}
-      POSTGRES_DB_NAME: ${POSTGRES_DB_NAME}
-      POSTGRES_USER: ${POSTGRES_USER}
-      GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID}
-      GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
-      CLOUDFLARE_TURNSTILE_SECRET_KEY: ${CLOUDFLARE_TURNSTILE_SECRET_KEY}
-      EMAIL_HOST: ${EMAIL_HOST}
-      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
-      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
-      ADMIN_URL_SEGMENT: ${ADMIN_URL_SEGMENT}
+    environment: *env-vars
     env_file:
-      - ./django_env/.env.prod
+      - ./V-Django-Backend/compose/prod/django/.env.prod
     depends_on:
       - postgres
       - redis
@@ -87,21 +75,9 @@ services:
     command: celery -A core beat --loglevel=info
     volumes:
       - .:/app
-    environment:
-      MEILISEARCH_V_1_MASTER_KEY: ${MEILISEARCH_V_1_MASTER_KEY}
-      POSTGRES_V_1_PASSWORD: ${POSTGRES_V_1_PASSWORD}
-      DJANGO_V_1_SECRET_KEY: ${DJANGO_V_1_SECRET_KEY}
-      POSTGRES_DB_NAME: ${POSTGRES_DB_NAME}
-      POSTGRES_USER: ${POSTGRES_USER}
-      GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID}
-      GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
-      CLOUDFLARE_TURNSTILE_SECRET_KEY: ${CLOUDFLARE_TURNSTILE_SECRET_KEY}
-      EMAIL_HOST: ${EMAIL_HOST}
-      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
-      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
-      ADMIN_URL_SEGMENT: ${ADMIN_URL_SEGMENT}
+    environment: *env-vars
     env_file:
-      - ./django_env/.env.prod
+      - ./V-Django-Backend/compose/prod/django/.env.prod
     depends_on:
       - postgres
       - redis
