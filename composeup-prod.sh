@@ -16,5 +16,5 @@ chmod +x ./V-Django-Backend/compose/prod/django/entrypoint.sh
 chmod +x ./V-Django-Backend/compose/prod/django/celery/beat/entrypoint.sh
 chmod +x ./V-Django-Backend/compose/prod/django/celery/workers/entrypoint.sh
 
-sudo docker compose down
-sudo docker compose up -f ./docker-compose.prod.yaml --build -d
+sudo docker compose -f ./docker-compose.prod.yaml down
+sudo docker compose -f ./docker-compose.prod.yaml up --build -d
