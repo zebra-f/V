@@ -2,7 +2,7 @@
 
 set -e
 
-if [ ! -f ./V-Django-Backend/compose/prod/.env.prod ]; then
+if [ ! -f ./V-Django-Backend/compose/prod/django/.env.prod ]; then
         echo ".env.prod for Django doesn't exists."
         exit 1
 fi
