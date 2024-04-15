@@ -8,6 +8,11 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
     ports:
       - 5432:5432
+    healthcheck:
+      test: "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB_NAME}"
+      interval: "20s"
+      timeout: "5s"
+      retries: 5
     volumes:
       - ${BIND_MOUNT_DATA_PATH}/postgres_data/data:/var/lib/postgresql/data
   redis:
@@ -15,6 +20,11 @@ services:
     container_name: redis-v-1-dev2
     ports:
       - "6379:6379"
+    healthcheck:
+      test: "redis-cli ping | grep PONG"
+      interval: "20s"
+      timeout: "5s"
+      retries: 5
   meilisearch:
     image: getmeili/meilisearch:v1.5
     container_name: meilisearch-v-1-dev2
@@ -28,12 +38,13 @@ services:
   django:
     build:
       context: ./V-Django-Backend/
-      dockerfile: ./compose/prod/django/Dockerfile
+      # note that WORKDIR is set to "app", not "django_app" as it is in docker-compose.prod.yaml
+      dockerfile: ./compose/dev/django/Dockerfile
     image: django-v-1-dev2:latest
     container_name: django-v-1-dev2
-    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
-      - .:/app
+      - ./V-Django-Backend/:/app
       - django_static:/django_app/django_static/
     ports:
       - 8000:8000
@@ -63,7 +74,7 @@ services:
     # starts a single process for Celery Workers and Celery Beat for the development of this app
     command: celery -A core worker -B --loglevel=INFO 
     volumes:
-      - .:/app
+      - ./V-Django-Backend/:/app
     environment: *env-vars
     env_file:
       - ./V-Django-Backend/compose/dev/django/.env.dev
