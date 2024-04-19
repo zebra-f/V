@@ -45,7 +45,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./V-Django-Backend/:/app
-      - django_static:/django_app/django_static/
+      - django_static:/app/django_static/
     ports:
       - 8000:8000
     environment: &env-vars
@@ -112,6 +112,7 @@ services:
     ports:
       - 80:80
     volumes:
+      # default.conf points to this dir
       - django_static:/django_app/django_static
       - ./Nginx/dev:/etc/nginx/conf.d
     depends_on: 
