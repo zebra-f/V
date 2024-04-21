@@ -58,7 +58,7 @@ services:
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
       ADMIN_URL_SEGMENT: ${ADMIN_URL_SEGMENT}
     env_file:
-      - ./Django-Backend/compose/prod/django/.env.prod
+      - ./V-Django-Backend/compose/prod/django/.env.prod
     depends_on:
       - postgres
       - redis
