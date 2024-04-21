@@ -42,7 +42,7 @@ services:
     container_name: django-v-1
     command: gunicorn --workers 4 core.wsgi:application --bind 0.0.0.0:8000
     volumes:
-      - ./V-Django-Backend/:/app
+      - ./V-Django-Backend/:/django_app
       - django_static:/django_app/django_static/
     environment: &env-vars
       MEILISEARCH_V_1_MASTER_KEY: ${MEILISEARCH_V_1_MASTER_KEY}
@@ -70,7 +70,7 @@ services:
     entrypoint: ./compose/prod/django/celery/workers/entrypoint.sh
     command: celery -A core worker --loglevel=info
     volumes:
-      - ./V-Django-Backend/:/app
+      - ./V-Django-Backend/:/django_app
     environment: *env-vars
     env_file:
       - ./V-Django-Backend/compose/prod/django/.env.prod
@@ -85,7 +85,7 @@ services:
     entrypoint: ./compose/prod/django/celery/beat/entrypoint.sh
     command: celery -A core beat --loglevel=info
     volumes:
-      - ./V-Django-Backend/:/app
+      - ./V-Django-Backend/:/django_app
     environment: *env-vars
     env_file:
       - ./V-Django-Backend/compose/prod/django/.env.prod
